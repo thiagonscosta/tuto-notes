@@ -1,0 +1,98 @@
+-Estado centralizado disponível para todos os componentes. Costumávamos chamá-lo de loja.
+-Funções para modificar o estado com segurança, rotineiramente chamadas de mutações.
+-Capacidade de modificar o estado em funções assíncronas, como chamadas de API.
+
+Evite que o programador dê um tiro no próprio pé, modificando o estado diretamente.
+É o último requisito que falta na maioria das propostas. E para mim é um requisito crucial.
+
+Vuex
+let state = { 
+    count: 0 
+} 
+let actions = { 
+    incrementCount ({commit}) { 
+        commit ('incrementCount') 
+    } 
+} 
+let mutations = { 
+    incrementCount (state) { 
+        state.count ++ 
+    } 
+} 
+exportação padrão { 
+    namespaced: true, 
+    state, 
+    mutações 
+}
+No Vuex
+export const clickStore = { 
+    estado: { 
+        contagem: 0 
+    }, 
+    incrementCount () { 
+        clickStore .state.count ++;    
+    } 
+}
+
+// api
+function getAllData(callback) {
+	$.get('/api/all-data).done((resp) => {
+		callback(resp);
+	});
+}
+
+function deleteData(id, callback) {
+	$.ajax({
+		url: `/api/data/${id}`,
+		type: 'DELETE',
+	}).done((resp)) => {
+		callback(resp);
+	});
+}
+
+function saveData(data, callback) {
+	$.ajax({
+		url: `/api/data${data.id ? `/${data.id}` : ''}`,
+		type: data.id ? 'POST' : 'PUT',
+		data: JSON.stringify(data),
+		contentType: 'application/json'
+	}).done((resp) => {
+		callback(resp);
+	});
+}
+
+export default {
+  getAllData,
+  saveData,
+  deleteData,
+};
+
+// store
+import dataApi from 'api/data';
+
+const state = () => ({
+	all: [],
+});
+
+const actions = {
+	loadData({ commit }) {
+		dataApi.getAlldata((resp) => {
+			commit('setData', resp);
+		});
+	},
+	deleteData({ dispatch }, { dataId }) => {
+		dataApi.deleteData(dataId, () => dispatch('loadData'));
+	},
+	saveData({ dispatch }, { data }) => {
+		dataApi.saveData(data, () => dispatch('loadData'));
+	}
+};
+
+const mutations = {};
+
+export default {
+	namespaced: true,
+	state,
+	actions,
+	mutations
+}
